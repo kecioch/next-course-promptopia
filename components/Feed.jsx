@@ -1,20 +1,39 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import PromptCard from "./PromptCard";
 import PromptCardList from "./PromptCardList";
 
 const Feed = () => {
   const [searchText, setSearchText] = useState("");
   const [posts, setPosts] = useState([]);
+  const [filteredPosts, setFilteredPosts] = useState([]);
 
-  const handleSearchChange = (e) => {};
+  const handleTagClick = (tag) => {
+    setSearchText(tag);
+  };
+
+  const handleSearchChange = (e) => {
+    const text = e.target.value;
+    setSearchText(text);
+  };
+
+  useEffect(() => {
+    setFilteredPosts(
+      posts.filter(
+        (p) =>
+          p.prompt.includes(searchText) ||
+          p.creator.username.includes(searchText) ||
+          p.tag.includes(searchText)
+      )
+    );
+  }, [searchText, posts]);
 
   useEffect(() => {
     const fetchPosts = async () => {
       const res = await fetch("/api/prompt");
       const data = await res.json();
       setPosts(data);
+      setFilteredPosts(data);
     };
 
     fetchPosts();
@@ -33,7 +52,7 @@ const Feed = () => {
         />
       </form>
 
-      <PromptCardList data={posts} handleTagClick={() => {}} />
+      <PromptCardList data={filteredPosts} handleTagClick={handleTagClick} />
     </section>
   );
 };
